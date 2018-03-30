@@ -1,0 +1,432 @@
+<html>
+	<head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> 
+        <style>
+        	.bluefont{
+        		color:0000FF;
+        	}
+        </style>
+		<script type = "text/javascript">
+			var cards = new Array(52);
+			var comsum=0;
+			var playersum=0;
+			var i=0;
+			var level=1;
+			var point;
+			var comcards = new Array(5);
+			var comcardnum=0;
+			var playercards = new Array(5)
+			var playercardnum=0;
+			var cheat_window;
+			var distributeButton_clickTime=0;
+			var win=0;
+			var betMoney;
+			var leftMoney=1000;
+			
+			initial_cards();
+			//when press the distribute button 
+			function press_distributeButton()
+			{	
+				var send_button=document.getElementById("stop_button");
+				send_button.disabled=false;
+				if(i<52)
+				{
+					distributeButton_clickTime++;
+					if(distributeButton_clickTime==1)
+					{
+						distribute_fourCards();
+						score();
+					}
+					if(distributeButton_clickTime==2)
+					{
+						playercards[playercardnum++] = cards[i++];
+						printcards();
+						score();
+					}
+					if(distributeButton_clickTime==3)
+					{
+						playercards[playercardnum++] = cards[i++];
+						printcards();
+						score();
+					}
+					if(distributeButton_clickTime==4)
+					{
+						playercards[playercardnum++] = cards[i++];
+						printcards();
+						score();
+					}
+					judge_broken();
+				}
+				else if(i>=52)
+				{
+					alert('You have run out of cards.');
+					score();
+					document.getElementById('comcards').innerHTML = "computer cards:"+"<img src=\"Pokers\\"+comcards[0]+".png\" />"+' ';
+					for(var k=1;k<comcardnum;k++)
+					{
+						document.getElementById('comcards').innerHTML += "<img src=\"Pokers\\"+comcards[k]+".png\" />"+' ';
+					}
+					judge_winner();
+					alert('You have run out of cards.please open a new game!');
+					document.getElementById('bet_button').disabled=true;
+				}
+					
+			}
+			//when press stop button 
+			function press_stopButton()
+			{
+				comturn();
+				score();
+				judge_winner();
+				if(i>=52)
+				{
+					alert('You have run out of cards.please open a new game');
+					gameover_reset();
+					document.getElementById('bet_button').disabled=true;
+				}
+			}
+			//when press cheat button
+			function press_cheatButton()
+			{
+				cheat_window=window.open();
+				cheat_window.document.write("<center><table border=1>");
+				for(var t=0;t<52;t++)
+				{
+					if(t==0||t==13||t==26||t==39)
+					cheat_window.document.write("<tr>");
+					if(t<i)
+					cheat_window.document.write("<td bgcolor='yellow'>"+(t+1)+"<br/><img src=\"Pokers\\"+cards[t]+".png\"/></td>");
+					else
+					cheat_window.document.write("<td bgcolor='lightblue'>"+(t+1)+"<br/><img src=\"Pokers\\"+cards[t]+".png\"/></td>");
+					if(t==12||t==25||t==38)
+					cheat_window.document.write("</tr>");
+     
+				}
+				cheat_window.document.write("</table></center>");
+			}
+			//when press shuffle button
+			function press_shuffleButton()
+			{
+				for(var t=i;t<52;t++)
+				{
+					var random = Math.floor(Math.random()*52);
+					while(random<i)
+					{
+						random = Math.floor(Math.random()*52);
+					}
+					var temp;
+					temp=cards[t];
+					cards[t]=cards[random];
+					cards[random]=temp;
+				}
+			}
+			//when press the new game button
+			function new_game()
+			{
+				comsum=0;
+				playersum=0;
+				i=0;
+				level=1;
+				comcards = new Array(5);
+				comcardnum=0;
+				playercards = new Array(5)
+				playercardnum=0;
+				distributeButton_clickTime=0;
+				win=0;
+				leftMoney=1000;
+				document.getElementById('comScore').innerHTML = '<h1>'+0+'</h1>';
+				document.getElementById('playerScore').innerHTML = '<h1>'+0+'</h1>';
+				document.getElementById('comcards').innerHTML = 'computer cards: ';
+				document.getElementById('playercards').innerHTML = 'player cards: ';
+				document.getElementById('leftMoney').innerHTML = "Your money:"+1000;
+				document.getElementById('betMoney').value=10;
+				initial_cards();
+				document.getElementById("stop_button").disabled=true;
+				document.getElementById('bet_button').disabled=false;
+				document.getElementById('distribute_button').disabled=true;
+				document.getElementById("newround_button").disabled=true;
+				document.getElementById('status').innerHTML='&uarr; Please decide how much to bet, and press "wager" button to start';
+				
+			}
+			//when press the new round button
+			function new_round()
+			{
+				gameover_reset();
+				initial_cards();
+				i=0;
+			}
+			//when press the bet button
+			function press_betButton()
+			{
+				betMoney=document.getElementById('betMoney').value;
+				if( betMoney<=leftMoney && betMoney>0 )
+				{
+					leftMoney -= betMoney;
+					document.getElementById('leftMoney').innerHTML = "Your money:"+leftMoney;
+					document.getElementById("bet_button").disabled=true;
+					document.getElementById("distribute_button").disabled=false;
+					document.getElementById("newround_button").disabled=false;
+					document.getElementById("status").innerHTML='';
+					
+				}
+				else if(leftMoney==0)
+				{
+					alert('Your money has run out! See you next time!');
+				}
+				else
+				{
+					alert('please key in a number between 1 and '+leftMoney);
+				}
+			}
+			//initial cards
+			function initial_cards()
+			{
+				for(var i=0;i<52;i++)	
+				{
+					cards[i]=i;
+				}
+				shuffle();
+			}
+			//shuffle
+			function shuffle()
+			{
+				var r;
+				for(var i=0;i<52;i++)
+				{
+					cards[i]=-1;
+				}
+				for(var i=0;i<52;i++)
+				{
+					r = Math.floor(Math.random()*52);
+					while(cards[r]!=-1)
+					{
+						r = Math.floor(Math.random()*52);
+					}
+					cards[r]=i;
+				}
+			}
+			//to distribute cards
+			function distribute_fourCards()
+			{
+					for(var j=1;j<=4;j++)
+					{
+						if(level==1&&i<52)//distribute distribute to player
+						{
+							playercards[playercardnum++] = cards[i++];
+							printcards();
+							level--;
+						}
+						else if(level==0&&i<52)//distribute a card to computer
+						{
+							comcards[comcardnum++] = cards[i++];
+							printcards();
+							level++;
+						}
+					}
+			}
+			//to print visual cards
+			function printcards()
+			{
+				if(level==1)
+					document.getElementById('playercards').innerHTML += "<img src=\"Pokers\\"+playercards[playercardnum-1]+".png\" />"+' ';
+				else if((level==0)&&(comcardnum==1))
+					document.getElementById('comcards').innerHTML += "<img src = \"Pokers\\back1.png\"/>"+' ';
+				else if((level==0)&&(comcardnum>1))
+					document.getElementById('comcards').innerHTML += "<img src=\"Pokers\\"+comcards[comcardnum-1]+".png\" />"+' ';
+			}
+			//to print computer score and player score	
+			function score()
+			{	
+				playersum=0;
+				comsum=0;
+				var playerone=0;
+				var comone=0;
+				for(var t=0;t<playercardnum;t++)
+				{
+					point=playercards[t]%13+1;
+					if(point>10)// J Q K =10
+					{
+						point = 10;
+					}
+					if(point==1)// A=11
+					{
+						point=11;
+						playerone++;
+					}
+					playersum += point;
+				}
+				while((playersum>21)&&(playerone>0))
+				{
+					playersum -=10;
+					playerone--;
+				}
+				for(var t=0;t<comcardnum;t++)
+				{
+					point=comcards[t]%13+1;
+					if(point>10)// J Q K =10
+					{
+						point = 10;
+					}
+					if(point==1)// A=11
+					{
+						comsum=11;
+						comone++;
+					}
+					comsum += point;
+				}
+				while((comsum>21)&&(comone>0))
+				{
+					point -=10;
+					comone--;	
+				}
+				
+				document.getElementById('playerScore').innerHTML = '<h1>'+playersum+'</h1>';
+			}
+			//judge if broken 
+			function judge_broken()
+			{				
+				if(playercardnum == 5 && playersum<=21)
+				{
+					win=1;
+					alert("You win! You're Five card Charlie!");
+					bet();
+					gameover_reset();
+				}
+				else if(playersum > 21)
+				{
+					alert('Bust! You lose!');
+					gameover_reset();
+				}
+				
+			}
+			//judge who's winner
+			function judge_winner()
+			{
+				if(comsum > 21)
+				{
+					document.getElementById('comScore').innerHTML = '<h1>'+comsum+'</h1>';
+					alert('You win! computer bust!');
+					win=1;
+					bet();
+					gameover_reset();
+				}
+				else if(playersum > comsum&&(comcardnum!=5))
+				{
+					document.getElementById('comScore').innerHTML = '<h1>'+comsum+'</h1>';
+					alert('You win! your point is bigger');
+					win=1;
+					bet();
+					gameover_reset();
+				}
+				else if ((playersum>comsum)&&(comcardnum==5))
+				{
+					document.getElementById('comScore').innerHTML = '<h1>'+comsum+'</h1>';
+					alert("You lose! computer's Five card Charlie.");
+					gameover_reset();
+				}
+				else if(playersum < comsum)
+				{
+					document.getElementById('comScore').innerHTML = '<h1>'+comsum+'</h1>';
+                    printcards();
+					alert("You lose! computer's point is bigger");
+					gameover_reset();
+				}
+				else if(comsum==playersum)
+				{
+					document.getElementById('comScore').innerHTML = '<h1>'+comsum+'</h1>';
+					alert('You lose! computer has the same score!');
+					gameover_reset();
+				}
+			}
+			//open a new round
+			function gameover_reset()
+			{
+				comsum=0;
+				playersum=0;
+				level=1;
+				comcards = new Array(5);
+				comcardnum=0;
+				playercards = new Array(5)
+				playercardnum=0;
+				distributeButton_clickTime=0;
+				win=0;
+				document.getElementById('comScore').innerHTML = '<h1>'+0+'</h1>';
+				document.getElementById('playerScore').innerHTML = '<h1>'+0+'</h1>';
+				document.getElementById('comcards').innerHTML = 'computer cards: ';
+				document.getElementById('playercards').innerHTML = 'player cards: ';
+				document.getElementById("stop_button").disabled=true;
+				document.getElementById('bet_button').disabled = false;
+				document.getElementById('distribute_button').disabled = true;
+				
+				//initial_cards();
+			}			
+			//computer's turn (AI)
+			function comturn()
+			{
+				//level--;
+				while((comsum<playersum)&&(comsum<21)&&(comcardnum<=4)&&i<52)
+				{
+					comcards[comcardnum++] = cards[i];
+					score();
+					i++;
+				}
+				document.getElementById('comcards').innerHTML = "computer cards:"+"<img src=\"Pokers\\"+comcards[0]+".png\" />"+' ';
+				for(var k=1;k<comcardnum;k++)
+				{
+					document.getElementById('comcards').innerHTML += "<img src=\"Pokers\\"+comcards[k]+".png\" />"+' ';
+				}	
+			}
+			function bet()
+			{
+				if(win==1)
+				{
+					leftMoney += betMoney*2;
+				}
+				document.getElementById('leftMoney').innerHTML= "Your money:"+leftMoney;
+			}
+		</script>
+	</head>
+	<body bgcolor = "lightblue">
+		<table border = 0>
+			<tr>
+				<td>
+				<input type = 'button' value = 'New game' onclick = "new_game()">
+				<input type = 'button' value ='New round' id="newround_button" disabled = 'disabled' onclick = 'new_round()'>
+				<input type = 'button' value = 'hit' id = 'distribute_button' disabled = 'disabled' onclick = "press_distributeButton()">
+				<input type ='button' value = 'stand' id = 'stop_button' disabled = 'disabled' onclick = "press_stopButton()">
+				<input type = 'button' value = 'shuffle' onclick = "press_shuffleButton()">
+				<input type="button" value="view cards"onclick="press_cheatButton()">
+				</td>
+			</tr>
+			<tr>
+				<td>
+				<input type = "text" id = "betMoney" value = 10 size = '8' style = "direction:rtl">
+				<input type = "button" value = 'wager' id = 'bet_button' onclick = 'press_betButton()'>
+				<p id = 'status' class="bluefont">&uarr; Please decide how much to bet, and press "wager" button to start</p>
+				</td>
+			</tr>
+			<tr>
+				<td id = 'leftMoney'>Your money:1000</td>
+			</tr>
+		</table>
+		<table border = 0>
+			<tbody>
+				<tr>
+					<td><h1>Player</h1></td>
+					<td id = 'playerScore'><h1>0</h1></td>
+				</tr>
+				<tr>
+					<td id = 'playercards'>player cards: </td>
+				</tr>
+				<tr>
+					<td><h1>Computer</h1></td>
+					<td id = 'comScore'><h1>0</h1></td>
+				</tr>
+				<tr>
+					<td id = 'comcards'>computer cards:</td>
+				</tr>
+			</tbody>
+		</table>
+		
+	</body>
+</html>
