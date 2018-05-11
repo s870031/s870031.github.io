@@ -2093,13 +2093,13 @@
 		}
 
 /* Header */
-
+	
 	#header {
 		position: relative;
 		background-image: url("../../images/header.jpg");
 		background-size: cover;
-		background-position: center center;
-		background-attachment: fixed;
+		background-position:  center center;
+		background-attachment: scroll;
 		color: #fff;
 		text-align: center;
 		padding: 7.5em 0 2em 0;
@@ -2541,7 +2541,14 @@
 			.carousel article p {
 				text-align: center;
 			}
+/* Super wide*/
+	@media screen and (max-width: 1920px){
+		/* Header */
 
+		#header {
+			background-position: 0 -150px;
+		}
+	}
 /* Wide */
 
 	@media screen and (max-width: 1680px) {
@@ -2552,6 +2559,11 @@
 				font-size: 14pt;
 				line-height: 1.75em;
 			}
+		/* Header */
+
+		#header {
+			background-position: 0 -130px;
+		}
 
 		/* Carousel */
 
@@ -2592,6 +2604,7 @@
 
 			#header {
 				background-attachment: scroll;
+				background-position: center center;
 			}
 
 				#header .inner {
@@ -2636,7 +2649,11 @@
 				display: block;
 				text-align: center;
 			}
+		/* Header */
 
+		#header {
+			background-position: center center;
+		}
 		/* Footer */
 
 			#footer {
